@@ -15,11 +15,10 @@ class Debug_Image_Editor {
 	public function __construct() {
 		$this->file = dirname( __FILE__ ) . '/amsterdam.jpg';
 
-		add_action( 'init', array( $this, 'init' ) );
 		add_filter( 'wp_image_editors', array( $this, 'get_image_editor' ), 1000 );
 	}
 
-	public function init() {
+	public function show_images() {
 		$image_editors = $this->image_editors();
 
 		echo '<table><tr>';
