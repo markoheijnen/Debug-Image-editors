@@ -11,6 +11,7 @@ Author URI: http://www.markoheijnen.com
 class Debug_Image_Editor {
 	private $image_editor = false;
 	private $file;
+	private $storage_dir;
 
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_admin_page' ) );
@@ -22,9 +23,14 @@ class Debug_Image_Editor {
 	}
 
 	public function show_images() {
-		$this->file = dirname( __FILE__ ) . '/amsterdam.jpg';
+		$upload_dir        = wp_upload_dir();
+		$this->file        = dirname( __FILE__ ) . '/amsterdam.jpg';
+		$this->storage_dir = $upload_dir['basedir'] . '/debug-image-editors';
+		$storage_url       = $upload_dir['baseurl'] . '/debug-image-editors';
 
-		$image_editors = $this->image_editors();
+		if( ! is_dir( $this->storage_dir ) ) {
+			wp_mkdir_p( $this->storage_dir );
+		}
 
 		echo '<div class="wrap">';
 
@@ -37,6 +43,8 @@ class Debug_Image_Editor {
 
 
 		echo '<table><tr>';
+
+		$image_editors = $this->image_editors();
 
 		foreach( $image_editors as $image_editor ) {
 			$this->set_image_editor( $image_editor );
@@ -51,19 +59,25 @@ class Debug_Image_Editor {
 				if( strpos( $method, 'example' ) !== false ) {
 					echo '<h2>' . $method . '</h2>';
 
-					$data = call_user_func_array( array( $this, $method ), array( $image_editor ) );
+					$file = $this->storage_dir . '/' . $image_editor . '-' . $method . '.jpg';
 
-					if( ! is_wp_error( $data ) ) {
-						echo '<img src="' . plugins_url( $data['file'], __FILE__ ) . '" />';
+					if( ! file_exists( $file ) || ( time() - filemtime( $file ) >= DAY_IN_SECONDS ) ) {
+						$data = call_user_func_array( array( $this, $method ), array( $image_editor ) );
+
+						if( ! is_wp_error( $data ) ) {
+							echo '<img src="' . $storage_url . '/' . $data['file'] . '" />';
+						}
+
+						/*
+						echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
+						var_dump( $data );
+						echo '</pre>';
+						*/
+						
 					}
-
-					/*
-					echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
-					var_dump( $data );
-					echo '</pre>';
-
-					echo '<div style="height: 30px; clear: both;"></div>';
-					*/
+					else {
+						echo '<img src="' . $storage_url . '/' . $image_editor . '-' . $method . '.jpg" />';
+					}
 				}
 			}
 
@@ -114,7 +128,7 @@ class Debug_Image_Editor {
 		if( ! is_wp_error( $editor ) ) {
 			$editor->resize( 300, 300, true );
 
-			return $editor->save( dirname( __FILE__ ) . '/' . $method . '-test1.jpg' ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $method . '-example1.jpg' ); // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
@@ -127,7 +141,7 @@ class Debug_Image_Editor {
 			// $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $src_abs
 			$editor->crop( 0, 0, 300, 300, 300, 300, false );
 
-			return $editor->save( dirname( __FILE__ ) . '/' . $method . '-test2.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $method . '-example2.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
@@ -143,7 +157,7 @@ class Debug_Image_Editor {
 
 			$editor->resize( 0, 512 );
 
-			return $editor->save( dirname( __FILE__ ) . '/' . $method . '-test3.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $method . '-example3.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
@@ -178,7 +192,7 @@ class Debug_Image_Editor {
 
 			$info = pathinfo( $this->file );
 
-			return $editor->save( dirname( __FILE__ ) . '/' . $method . '-test4.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $method . '-example4.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
