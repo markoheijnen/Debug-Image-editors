@@ -13,20 +13,29 @@ class Debug_Image_Editor {
 	private $file;
 
 	public function __construct() {
-		$this->file = dirname( __FILE__ ) . '/amsterdam.jpg';
-
+		add_action( 'admin_menu', array( $this, 'add_admin_page' ) );
 		add_filter( 'wp_image_editors', array( $this, 'get_image_editor' ), 1000 );
 	}
 
+	public function add_admin_page() {
+		add_management_page( 'Debug Image Editors', 'Debug Image Editors', 'manage_options', 'debug-image-editors', array( $this, 'show_images' ) );
+	}
+
 	public function show_images() {
+		$this->file = dirname( __FILE__ ) . '/amsterdam.jpg';
+
 		$image_editors = $this->image_editors();
+
+		echo '<div class="wrap">';
+
+		echo '<h2>Debug Image Editors</h2>';
 
 		echo '<table><tr>';
 
 		foreach( $image_editors as $image_editor ) {
 			$this->set_image_editor( $image_editor );
 
-			echo '<td>';
+			echo '<td style="vertical-align: top;">';
 
 			echo '<h1>' . $image_editor . '</h1>';
 
@@ -42,18 +51,22 @@ class Debug_Image_Editor {
 						echo '<img src="' . plugins_url( $data['file'], __FILE__ ) . '" />';
 					}
 
+					/*
 					echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
 					var_dump( $data );
 					echo '</pre>';
 
 					echo '<div style="height: 30px; clear: both;"></div>';
+					*/
 				}
 			}
 
 			echo '</td>';
 		}
 
-		die();
+		echo '</tr></table>';
+
+		echo '</div>';
 	}
 
 	private function image_editors() {
