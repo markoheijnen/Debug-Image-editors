@@ -168,4 +168,6 @@ class Debug_Image_Editor {
 
 }
 
-$debug_image_editor = new Debug_Image_Editor;
+if( is_admin() ) {
+	$debug_image_editor = new Debug_Image_Editor;
+}
