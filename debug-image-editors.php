@@ -67,12 +67,11 @@ class Debug_Image_Editor {
 						if( ! is_wp_error( $data ) ) {
 							echo '<img src="' . $storage_url . '/' . $data['file'] . '" />';
 						}
-
-						/*
-						echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
-						var_dump( $data );
-						echo '</pre>';
-						*/
+						else {
+							echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
+							var_dump( $data );
+							echo '</pre>';
+						}
 						
 					}
 					else {
