@@ -30,6 +30,12 @@ class Debug_Image_Editor {
 
 		echo '<h2>Debug Image Editors</h2>';
 
+		echo '<div class="tool-box">';
+		echo '<h3 class="title">Current image editor</h3>';
+		echo _wp_image_editor_choose();
+		echo '</div>';
+
+
 		echo '<table><tr>';
 
 		foreach( $image_editors as $image_editor ) {
