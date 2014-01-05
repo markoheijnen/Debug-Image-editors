@@ -23,7 +23,7 @@ class Debug_Image_Editor {
 
 	public function on_deactivation() {
 		$upload_dir  = wp_upload_dir();
-		$storage_dir = $upload_dir['basedir'] . '/debug-image-editors';
+		$storage_dir = $upload_dir['basedir'] . '/debug-image-editors/';
 
 		$files = glob( $storage_dir . '*', GLOB_MARK );
 
