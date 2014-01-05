@@ -14,9 +14,26 @@ class Debug_Image_Editor {
 	private $storage_dir;
 
 	public function __construct() {
+		register_deactivation_hook( __FILE__, array( $this, 'on_deactivation' ) );
+
 		add_action( 'admin_menu', array( $this, 'add_admin_page' ) );
 		add_filter( 'wp_image_editors', array( $this, 'get_image_editor' ), 1000 );
 	}
+
+
+	public function on_deactivation() {
+		$upload_dir  = wp_upload_dir();
+		$storage_dir = $upload_dir['basedir'] . '/debug-image-editors';
+
+		$files = glob( $storage_dir . '*', GLOB_MARK );
+
+		foreach ( $files as $file ) {
+			unlink( $file ); 
+		} 
+
+		rmdir( $storage_dir );
+	}
+
 
 	public function add_admin_page() {
 		add_management_page( 'Debug Image Editors', 'Debug Image Editors', 'manage_options', 'debug-image-editors', array( $this, 'show_images' ) );
