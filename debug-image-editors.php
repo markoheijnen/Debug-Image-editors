@@ -102,7 +102,7 @@ class Debug_Image_Editor {
 					}
 					else {
 						echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
-						var_dump( $data );
+						var_dump( $file );
 						echo '</pre>';
 					}
 				}
