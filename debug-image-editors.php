@@ -8,6 +8,8 @@ Version: 1.0
 Author URI: http://www.markoheijnen.com
 */
 
+include 'core-changes.php';
+
 class Debug_Image_Editor {
 	private $image_editor = false;
 	private $file;
@@ -209,6 +211,21 @@ class Debug_Image_Editor {
 			$info = pathinfo( $this->file );
 
 			return $editor->save( $this->storage_dir . '/' . $method . '-example4.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
+		}
+
+		return $editor;
+	}
+
+	/*
+	 * WebP!
+	 */
+	function example5( $method ) {
+		$editor = wp_get_image_editor( $this->file );
+
+		if( ! is_wp_error( $editor ) ) {
+			$editor->resize( 300, 300, true );
+
+			return $editor->save( $this->storage_dir . '/' . $method . '-example5.webp' );
 		}
 
 		return $editor;
