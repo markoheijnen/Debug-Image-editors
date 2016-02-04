@@ -41,11 +41,28 @@ class Debug_Image_Editor {
 		add_management_page( 'Debug Image Editors', 'Debug Image Editors', 'manage_options', 'debug-image-editors', array( $this, 'show_images' ) );
 	}
 
+
+	public function get_image_editor( $image_editors ) {
+		if ( $this->image_editor ) {
+			return array( $this->image_editor );
+		}
+
+		return $image_editors;
+	}
+
+	private function set_image_editor( $image_editor ) {
+		$this->image_editor = $image_editor;
+	}
+
+
+
+
+
 	public function show_images() {
 		$upload_dir        = wp_upload_dir();
 		$this->file        = dirname( __FILE__ ) . '/amsterdam.jpg';
 		$this->storage_dir = $upload_dir['basedir'] . '/debug-image-editors';
-		$storage_url       = $upload_dir['baseurl'] . '/debug-image-editors';
+		$this->storage_url = $upload_dir['baseurl'] . '/debug-image-editors';
 
 		if( ! is_dir( $this->storage_dir ) ) {
 			wp_mkdir_p( $this->storage_dir );
@@ -78,23 +95,15 @@ class Debug_Image_Editor {
 				if( strpos( $method, 'example' ) !== false ) {
 					echo '<h2>' . $method . '</h2>';
 
-					$file = $this->storage_dir . '/' . $image_editor . '-' . $method . '.jpg';
+					$file = call_user_func( array( $this, $method ) );
 
-					if( ! file_exists( $file ) || ( time() - filemtime( $file ) >= DAY_IN_SECONDS ) ) {
-						$data = call_user_func_array( array( $this, $method ), array( $image_editor ) );
-
-						if( ! is_wp_error( $data ) ) {
-							echo '<img src="' . $storage_url . '/' . $data['file'] . '" />';
-						}
-						else {
-							echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
-							var_dump( $data );
-							echo '</pre>';
-						}
-						
+					if( ! is_wp_error( $file ) ) {
+						echo '<img src="' . $this->storage_url . '/' . $file . '" />';
 					}
 					else {
-						echo '<img src="' . $storage_url . '/' . $image_editor . '-' . $method . '.jpg" />';
+						echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
+						var_dump( $data );
+						echo '</pre>';
 					}
 				}
 			}
@@ -107,65 +116,55 @@ class Debug_Image_Editor {
 		echo '</div>';
 	}
 
-	private function image_editors() {
-		require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
-		require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
-		require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';
 
-		$implementations = apply_filters( 'wp_image_editors',
-			array( 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD' ) );
+	//
+	// TEST CASES
+	//
 
-		$editors = array();
+	public function example1() {
+		$file = $this->image_editor . '-example1.jpg';
 
-		foreach ( $implementations as $implementation ) {
-			if ( ! call_user_func( array( $implementation, 'test' ), array() ) )
-				continue;
-
-			$editors[] = $implementation;
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
 		}
 
-		return $editors;
-	}
-
-
-	private function set_image_editor( $image_editor ) {
-		$this->image_editor = $image_editor;
-	}
-
-	public function get_image_editor( $image_editors ) {
-		if ( $this->image_editor )
-			return array( $this->image_editor );
-
-		return $image_editors;
-	}
-
-
-	function example1( $method ) {
 		$editor = wp_get_image_editor( $this->file );
 
 		if( ! is_wp_error( $editor ) ) {
 			$editor->resize( 300, 300, true );
 
-			return $editor->save( $this->storage_dir . '/' . $method . '-example1.jpg' ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
 	}
 
-	function example2( $method ) {
+	public function example2() {
+		$file = $this->image_editor . '-example2.jpg';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
 		$editor = wp_get_image_editor( $this->file );
 
 		if( ! is_wp_error( $editor ) ) {
 			// $src_x, $src_y, $src_w, $src_h, $dst_w, $dst_h, $src_abs
 			$editor->crop( 0, 0, 300, 300, 300, 300, false );
 
-			return $editor->save( $this->storage_dir . '/' . $method . '-example2.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
 	}
 
-	function example3( $method ) {
+	public function example3() {
+		$file = $this->image_editor . '-example3.jpg';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
 		$editor = wp_get_image_editor( $this->file );
 
 		if( ! is_wp_error( $editor ) ) {
@@ -175,7 +174,7 @@ class Debug_Image_Editor {
 
 			$editor->resize( 0, 512 );
 
-			return $editor->save( $this->storage_dir . '/' . $method . '-example3.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
@@ -185,7 +184,13 @@ class Debug_Image_Editor {
 	 * Broken example for imagick till 3.7.
 	 * 0.7 is the goldenrule (selfclaimed) to never have black boundaries
 	 */
-	function example4( $method ) {
+	public function example4() {
+		$file = $this->image_editor . '-example4.jpg';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
 		$editor = wp_get_image_editor( $this->file );
 
 		if( ! is_wp_error( $editor ) ) {
@@ -210,7 +215,7 @@ class Debug_Image_Editor {
 
 			$info = pathinfo( $this->file );
 
-			return $editor->save( $this->storage_dir . '/' . $method . '-example4.jpg'  ); // Save the file as /path/to/image-100x100.jpeg
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
 		}
 
 		return $editor;
@@ -219,16 +224,56 @@ class Debug_Image_Editor {
 	/*
 	 * WebP!
 	 */
-	function example5( $method ) {
+	public function example5() {
+		$file = $this->image_editor . '-example5.webp';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
 		$editor = wp_get_image_editor( $this->file );
 
 		if( ! is_wp_error( $editor ) ) {
 			$editor->resize( 300, 300, true );
 
-			return $editor->save( $this->storage_dir . '/' . $method . '-example5.webp' );
+			return $editor->save( $this->storage_dir . '/' . $file )['file'];
 		}
 
 		return $editor;
+	}
+
+
+
+	//
+	// Helper Methods
+	//
+
+	private function image_editors() {
+		require_once ABSPATH . WPINC . '/class-wp-image-editor.php';
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-gd.php';
+		require_once ABSPATH . WPINC . '/class-wp-image-editor-imagick.php';
+
+		$implementations = apply_filters( 'wp_image_editors',
+			array( 'WP_Image_Editor_Imagick', 'WP_Image_Editor_GD' ) );
+
+		$editors = array();
+
+		foreach ( $implementations as $implementation ) {
+			if ( ! call_user_func( array( $implementation, 'test' ), array() ) )
+				continue;
+
+			$editors[] = $implementation;
+		}
+
+		return $editors;
+	}
+
+	private function is_file_cached( $path ) {
+		if( ! file_exists( $path ) || ( time() - filemtime( $path ) >= DAY_IN_SECONDS ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 }
