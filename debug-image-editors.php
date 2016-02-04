@@ -231,12 +231,22 @@ class Debug_Image_Editor {
 			return $file;
 		}
 
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $this->image_editor . '-example5.jpg' ) ) {
+			return new WP_Error( 'failed_test', __('File got saved as JPG') );
+		}
+
 		$editor = wp_get_image_editor( $this->file );
 
 		if( ! is_wp_error( $editor ) ) {
 			$editor->resize( 300, 300, true );
 
-			return $editor->save( $this->storage_dir . '/' . $file )['file'];
+			$image_data = $editor->save( $this->storage_dir . '/' . $file );
+			
+			if ( 'image/jpeg' == $image_data['mime-type'] ) {
+				return new WP_Error( 'failed_test', __('File got saved as JPG') );
+			}
+
+			return $image_data['file'];
 		}
 
 		return $editor;
