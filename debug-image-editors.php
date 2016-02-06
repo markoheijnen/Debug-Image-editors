@@ -78,14 +78,15 @@ class Debug_Image_Editor {
 		echo '</div>';
 
 
-		echo '<table><tr>';
+		echo '<table style="width:100%"><tr>';
 
 		$image_editors = $this->image_editors();
+		$width = 100 / count( $image_editors );
 
 		foreach( $image_editors as $image_editor ) {
 			$this->set_image_editor( $image_editor );
 
-			echo '<td style="vertical-align: top;">';
+			echo '<td style="vertical-align: top; width:' . $width . '%">';
 
 			echo '<h1>' . $image_editor . '</h1>';
 
@@ -98,7 +99,7 @@ class Debug_Image_Editor {
 					$file = call_user_func( array( $this, $method ) );
 
 					if( ! is_wp_error( $file ) ) {
-						echo '<img src="' . $this->storage_url . '/' . $file . '" />';
+						echo '<img src="' . $this->storage_url . '/' . $file . '" style="max-width:100%" />';
 					}
 					else {
 						echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
