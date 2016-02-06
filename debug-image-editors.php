@@ -257,6 +257,33 @@ class Debug_Image_Editor {
 		return $editor;
 	}
 
+	/*
+	 * Animation!
+	 */
+	public function example6() {
+		$file = $this->image_editor . '-example6.gif';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			//return $file;
+		}
+
+		$editor = wp_get_image_editor( dirname( __FILE__ ) . '/giphy.gif' );
+
+		if ( ! is_wp_error( $editor ) ) {
+			$editor->resize( 400, 250, true );
+
+			$image_data = $editor->save( $this->storage_dir . '/' . $file );
+
+			if ( is_wp_error( $image_data ) ) {
+				return $image_data;
+			}
+
+			return $image_data['file'];
+		}
+
+		return $editor;
+	}
+
 
 
 	//
