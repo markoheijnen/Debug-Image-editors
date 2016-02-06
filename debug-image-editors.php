@@ -242,6 +242,10 @@ class Debug_Image_Editor {
 			$editor->resize( 300, 300, true );
 
 			$image_data = $editor->save( $this->storage_dir . '/' . $file );
+
+			if ( is_wp_error( $image_data ) ) {
+				return $image_data;
+			}
 			
 			if ( 'image/jpeg' == $image_data['mime-type'] ) {
 				return new WP_Error( 'failed_test', __('File got saved as JPG') );
