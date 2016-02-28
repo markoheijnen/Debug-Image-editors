@@ -293,6 +293,78 @@ class Debug_Image_Editor {
 		return $editor;
 	}
 
+	public function example7() {
+		$file = $this->image_editor . '-example7.jpg';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
+		$editor = wp_get_image_editor( dirname( __FILE__ ) . '/images/wordpress-logo-stacked-cmyk.pdf' );
+
+		if ( ! is_wp_error( $editor ) ) {
+			$editor->resize( 300, 300, true );
+
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
+		}
+
+		return $editor;
+	}
+
+	public function example8() {
+		$file = $this->image_editor . '-example8.jpg';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
+		$editor = wp_get_image_editor( dirname( __FILE__ ) . '/images/wordpress.eps' );
+
+		if ( ! is_wp_error( $editor ) ) {
+			$editor->resize( 300, 300, true );
+
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
+		}
+
+		return $editor;
+	}
+
+	public function example9() {
+		$file = $this->image_editor . '-example9.jpg';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
+		$editor = wp_get_image_editor( dirname( __FILE__ ) . '/images/wordpress.ai' );
+
+		if ( ! is_wp_error( $editor ) ) {
+			$editor->resize( 300, 300, true );
+
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
+		}
+
+		return $editor;
+	}
+
+	public function example10() {
+		$file = $this->image_editor . '-example10.jpg';
+
+		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
+			return $file;
+		}
+
+		$editor = wp_get_image_editor( dirname( __FILE__ ) . '/images/Channel_digital_image_CMYK_color.jpg' );
+
+		if ( ! is_wp_error( $editor ) ) {
+			$editor->resize( 300, 300, true );
+
+			return $editor->save( $this->storage_dir . '/' . $file )['file']; // Save the file as /path/to/image-100x100.jpeg
+		}
+
+		return $editor;
+	}
+
 
 
 	//
