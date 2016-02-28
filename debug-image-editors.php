@@ -60,7 +60,7 @@ class Debug_Image_Editor {
 
 	public function show_images() {
 		$upload_dir        = wp_upload_dir();
-		$this->file        = dirname( __FILE__ ) . '/amsterdam.jpg';
+		$this->file        = dirname( __FILE__ ) . '/images/amsterdam.jpg';
 		$this->storage_dir = $upload_dir['basedir'] . '/debug-image-editors';
 		$this->storage_url = $upload_dir['baseurl'] . '/debug-image-editors';
 
@@ -78,41 +78,50 @@ class Debug_Image_Editor {
 		echo '</div>';
 
 
-		echo '<table style="width:100%"><tr>';
+		echo '<table style="margin-top: 20px; width:100%">';
 
 		$image_editors = $this->image_editors();
-		$width = 100 / count( $image_editors );
+		$methods       = get_class_methods( __CLASS__ );
+		$amount        = count( $image_editors );
+		$width         = 100 / $amount;
 
+
+		echo '<tr>';
 		foreach( $image_editors as $image_editor ) {
-			$this->set_image_editor( $image_editor );
-
-			echo '<td style="vertical-align: top; width:' . $width . '%">';
-
+			echo '<td style="width:' . $width . '%">';
 			echo '<h1>' . $image_editor . '</h1>';
-
-			$methods = get_class_methods( __CLASS__ );
-
-			foreach( $methods as $method ) {
-				if( strpos( $method, 'example' ) !== false ) {
-					echo '<h2>' . $method . '</h2>';
-
-					$file = call_user_func( array( $this, $method ) );
-
-					if( ! is_wp_error( $file ) ) {
-						echo '<img src="' . $this->storage_url . '/' . $file . '" style="max-width:100%" />';
-					}
-					else {
-						echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
-						var_dump( $file );
-						echo '</pre>';
-					}
-				}
-			}
-
 			echo '</td>';
 		}
+		echo '</tr>';
 
-		echo '</tr></table>';
+
+		foreach ( $methods as $method ) {
+			if ( strpos( $method, 'example' ) === false ) {
+				continue;
+			}
+
+			echo '<tr><td colspan="' . $amount . '"><h2>' . $method . '</h2></td></tr>';
+
+			echo '<tr>';
+			foreach( $image_editors as $image_editor ) {
+				echo '<td style="vertical-align: top;">';
+				$this->set_image_editor( $image_editor );
+				$file = call_user_func( array( $this, $method ) );
+
+				if( ! is_wp_error( $file ) ) {
+					echo '<img src="' . $this->storage_url . '/' . $file . '" style="max-width:100%" />';
+				}
+				else {
+					echo '<pre style="white-space: pre-wrap; word-wrap:break-word;">';
+					var_dump( $file );
+					echo '</pre>';
+				}
+				echo '</td>';
+			}
+			echo '</tr>';
+		}
+
+		echo '</table>';
 
 		echo '</div>';
 	}
@@ -264,10 +273,10 @@ class Debug_Image_Editor {
 		$file = $this->image_editor . '-example6.gif';
 
 		if ( $this->is_file_cached( $this->storage_dir . '/' . $file ) ) {
-			//return $file;
+			return $file;
 		}
 
-		$editor = wp_get_image_editor( dirname( __FILE__ ) . '/giphy.gif' );
+		$editor = wp_get_image_editor( dirname( __FILE__ ) . '/images/giphy.gif' );
 
 		if ( ! is_wp_error( $editor ) ) {
 			$editor->resize( 400, 250, true );
